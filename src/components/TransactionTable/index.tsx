@@ -1,12 +1,27 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { api } from '../../services/api';
 
 import { Container } from './styles';
 
+interface TransactionProps {
+  id: number;
+  title: string;
+  amount: Amount;
+  type: string;
+  category: string;
+  createdAt: Date;
+}
+
+type Amount = {
+  amount: 'deposit' | 'with-draw';
+}
+
 export const TransactionTable: React.FC = () => {
+  const [transactions, setTransactions] = useState<TransactionProps[]>();
+
   useEffect(() => {
-    fetch('http://localhost:3000/api/transactions')
-      .then(response => response.json())
-      .then(data => console.log(data));
+    api.get('transactions')
+      .then(response => setTransactions(response.data));
   }, []);
   return (
     <Container>
@@ -21,21 +36,16 @@ export const TransactionTable: React.FC = () => {
         </thead>
 
         <tbody>
-          <tr>
-            <td>Desenvolvimento Web</td>
-            <td className="deposit">R$12.000,00</td>
-            <td>Desenvolvimento</td>
-            <td>06/09/2021</td>
+        {transactions && transactions.map(transaction => (
+          <tr key={transaction.id}>
+            <td>{transaction.id}</td>
+            <td className={transaction.type === 'deposit' ? "deposit" : 'with-draw'}>
+              {transaction.amount}
+            </td>
+            <td>{transaction.category}</td>
+            <td>{transaction.createdAt}</td>
           </tr>
-        </tbody>
-
-        <tbody>
-          <tr>
-            <td>Gasolina</td>
-            <td className="with-draw">-R$2.000,00</td>
-            <td>Veículo</td>
-            <td>02/09/2021</td>
-          </tr>
+        ))}
         </tbody>
       </table>
     </Container>
